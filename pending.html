@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pending Anganwadis — Anganwadi Survey</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; max-width: 820px; margin: 0 auto; padding: 20px; background: #f0f4f0; color: #222; }
+    .card { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .header { background: linear-gradient(135deg, #1a6b3a, #2d9e5f); color: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; }
+    .header h1 { margin: 0 0 4px; font-size: 22px; }
+    .header p  { margin: 0; opacity: 0.85; font-size: 13px; }
+    .survey-block { border: 1px solid #d8e8d8; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .survey-title { font-size: 17px; font-weight: bold; color: #1a6b3a; margin: 0 0 4px; }
+    .survey-sub   { font-size: 13px; color: #666; margin: 0 0 16px; }
+    .counts { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+    .count-box { background: #f0f7f3; border-radius: 8px; padding: 12px 20px; min-width: 100px; }
+    .count-box .num { font-size: 30px; font-weight: bold; color: #1a6b3a; line-height: 1; }
+    .count-box .num.red { color: #c62828; }
+    .count-box .lbl { font-size: 12px; color: #555; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 14px; }
+    thead th { background: #1a6b3a; color: #fff; padding: 10px 12px; text-align: left; }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid #eee; }
+    tbody tr:nth-child(even) { background: #f9fdf9; }
+    .all-done { color: #1a6b3a; font-weight: bold; padding: 10px 0; }
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .btn { border: none; padding: 9px 18px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+    .btn-primary  { background: #1a6b3a; color: #fff; }
+    .btn-primary:hover { background: #155530; }
+    .btn-outline  { background: #fff; color: #1a6b3a; border: 2px solid #1a6b3a; }
+    .btn-outline:hover { background: #f0f7f3; }
+    .loading { color: #888; font-style: italic; padding: 16px 0; }
+    .error   { color: #c62828; background: #ffebee; border-radius: 6px; padding: 12px 16px; margin-top: 8px; font-size: 14px; }
+    .refresh-row { text-align: right; margin-bottom: 10px; }
+    @media (max-width: 500px) {
+      .counts { gap: 10px; }
+      .count-box { padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <h1>सर्वेक्षण न भरलेल्या अंगणवाड्या</h1>
+    <p>Anganwadis That Have Not Yet Submitted — Admin View</p>
+  </div>
+
+  <div class="refresh-row">
+    <button class="btn btn-outline" onclick="location.reload()">🔄 Refresh</button>
+  </div>
+
+  <div id="app"><div class="loading">Loading survey data…</div></div>
+</div>
+
+<!-- Load the master index and all survey definitions -->
+<script src="surveys/index.js"></script>
+<script>
+// Keyed by survey.id — holds pending school arrays for export
+const PENDING_STORE = {};
+
+async function init() {
+  // Dynamically load each survey JS file
+  for (const id of SURVEY_INDEX) {
+    await new Promise(resolve => {
+      const s = document.createElement('script');
+      s.src = `surveys/${id}.js?v=${Date.now()}`;
+      s.onload  = resolve;
+      s.onerror = () => { console.warn('Could not load survey: ' + id); resolve(); };
+      document.head.appendChild(s);
+    });
+  }
+
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+
+  if (!window.SURVEYS || window.SURVEYS.length === 0) {
+    app.innerHTML = '<div class="error">No surveys found. Check that survey files are loaded correctly.</div>';
+    return;
+  }
+
+  for (const survey of window.SURVEYS) {
+    const block = document.createElement('div');
+    block.className = 'survey-block';
+    block.innerHTML = `
+      <div class="survey-title">${survey.name}</div>
+      <div class="survey-sub">${survey.subtitle || ''} &nbsp;|&nbsp; 📅 ${survey.start} ते ${survey.end}</div>
+      <div class="loading">Fetching submitted Anganwadis from Google Sheet…</div>`;
+    app.appendChild(block);
+
+    try {
+      const url = SUBMIT_URL + '?action=all_submitted&tab=' + encodeURIComponent(survey.sheet_tab);
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      const submittedSet = new Set(
+        (data.submitted_udises || []).map(u => String(u).trim())
+      );
+
+      // Exclude the TEST entry from counts and pending list
+      const realSchools = survey.schools.filter(s => s.udise.indexOf('TEST') !== 0);
+      const pending  = realSchools.filter(s => !submittedSet.has(s.udise));
+      const done     = realSchools.filter(s =>  submittedSet.has(s.udise));
+
+      PENDING_STORE[survey.id] = pending;
+
+      let tableHtml = '';
+      if (pending.length === 0) {
+        tableHtml = `<div class="all-done">✅ सर्वनी उत्तर दिले आहे! / All Anganwadis have submitted.</div>`;
+      } else {
+        const rows = pending.map((s, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td><strong>${s.udise}</strong></td>
+            <td>${s.name}</td>
+            <td>${s.taluka}</td>
+          </tr>`).join('');
+
+        tableHtml = `
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>अंगणवाडी क्रमांक</th>
+                <th>अंगणवाडीचे नाव</th>
+                <th>तालुका</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="btn-row">
+            <button class="btn btn-primary"  onclick="downloadCSV('${survey.id}', '${survey.id}')">⬇ Download CSV</button>
+            <button class="btn btn-outline"  onclick="copyList('${survey.id}')">📋 Copy List</button>
+          </div>`;
+      }
+
+      block.innerHTML = `
+        <div class="survey-title">${survey.name}</div>
+        <div class="survey-sub">${survey.subtitle || ''} &nbsp;|&nbsp; 📅 ${survey.start} ते ${survey.end}</div>
+        <div class="counts">
+          <div class="count-box">
+            <div class="num">${realSchools.length}</div>
+            <div class="lbl">एकूण / Total</div>
+          </div>
+          <div class="count-box">
+            <div class="num">${done.length}</div>
+            <div class="lbl">सादर / Submitted</div>
+          </div>
+          <div class="count-box">
+            <div class="num red">${pending.length}</div>
+            <div class="lbl">बाकी / Pending</div>
+          </div>
+        </div>
+        ${tableHtml}`;
+
+    } catch (err) {
+      block.innerHTML = `
+        <div class="survey-title">${survey.name}</div>
+        <div class="error">
+          <strong>Could not fetch data.</strong><br/>
+          ${err.message}<br/><br/>
+          Make sure the Apps Script has been updated with the <code>all_submitted</code> action.
+          See <code>apps-script-pending-action.js</code> for the code to add.
+        </div>`;
+    }
+  }
+}
+
+function downloadCSV(surveyId, filename) {
+  const pending = PENDING_STORE[surveyId] || [];
+  const rows = [['#', 'Anganwadi Number', 'Anganwadi Name', 'Taluka']];
+  pending.forEach((s, i) => rows.push([i + 1, s.udise, s.name, s.taluka]));
+  const csv = rows
+    .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `pending_${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+function copyList(surveyId) {
+  const pending = PENDING_STORE[surveyId] || [];
+  const text = pending.map(s => `${s.udise}\t${s.name}`).join('\n');
+  navigator.clipboard.writeText(text)
+    .then(() => alert(`${pending.length} अंगणवाड्याची यादी कॉपी झाली!\n${pending.length} Anganwadi(s) copied to clipboard.`))
+    .catch(() => alert('Copy failed — please select and copy the table manually.'));
+}
+
+init();
+</script>
+</body>
+</html>

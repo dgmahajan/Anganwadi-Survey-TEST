@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anganwadi Survey System — How To Guide</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; color: #333; line-height: 1.7; }
+    h1 { color: #1a6b3a; border-bottom: 3px solid #1a6b3a; padding-bottom: 10px; }
+    h2 { color: #1a6b3a; margin-top: 32px; }
+    h3 { color: #555; margin-top: 20px; }
+    .box { background: #f0f7f3; border-left: 4px solid #1a6b3a; padding: 14px 18px; border-radius: 6px; margin: 16px 0; }
+    .warn { background: #fff8e1; border-left: 4px solid #f39c12; padding: 14px 18px; border-radius: 6px; margin: 16px 0; }
+    ol, ul { padding-left: 24px; }
+    li { margin-bottom: 8px; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th { background: #1a6b3a; color: #fff; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #ddd; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .step { background: #1a6b3a; color: #fff; border-radius: 50%; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 8px; font-size: 14px; }
+    @media print { body { margin: 20px; } }
+  </style>
+</head>
+<body>
+
+<h1>📋 Anganwadi Survey System — How To Guide</h1>
+<p><strong>Survey Link (never changes):</strong> <code>https://dgmahajan.github.io/Anganwadi-Survey</code></p>
+<p><strong>Google Sheet:</strong> Anganwadi Survey (in your Google Drive)</p>
+
+<div class="box">
+  <strong>Key idea:</strong> For each new survey, you give your developer the information below. He creates one file and sends it to you. You upload it to GitHub. That's all.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>1. Starting a New Survey</h2>
+<p>Give your developer the following 7 things:</p>
+
+<table>
+  <tr><th>#</th><th>What to give</th><th>Example</th></tr>
+  <tr><td>1</td><td><strong>Survey name</strong> (in Marathi)</td><td>ऑफ-ग्रिड सौर ऊर्जा योजना स्थिती सर्वेक्षण</td></tr>
+  <tr><td>2</td><td><strong>Subtitle</strong> (in English)</td><td>Murbad Taluka — off-grid solar power scheme Status Survey</td></tr>
+  <tr><td>3</td><td><strong>Start date</strong></td><td>2026-04-28</td></tr>
+  <tr><td>4</td><td><strong>End date</strong></td><td>2026-05-31</td></tr>
+  <tr><td>5</td><td><strong>Sheet tab name</strong> (what to call the tab in Google Sheet)</td><td>Murbad Anganwadi 2026</td></tr>
+  <tr><td>6</td><td><strong>Anganwadi list</strong> (ID, name, taluka) — paste from Excel</td><td>See below</td></tr>
+  <tr><td>7</td><td><strong>Questions</strong> — write them out in plain language</td><td>See below</td></tr>
+</table>
+
+<h3>Question types available:</h3>
+<ul>
+  <li><strong>Yes / No</strong> — simple two-button choice</li>
+  <li><strong>Yes / No / Don't Know</strong> — three-button choice</li>
+  <li><strong>Number</strong> — worker types a number (you specify min and max)</li>
+  <li><strong>Text</strong> — worker types free text (can be optional)</li>
+  <li>Any question can be set to appear <strong>only if a previous question was answered in a specific way</strong></li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>2. What Your Developer Gives You Back</h2>
+<p>He will give you <strong>two files</strong>:</p>
+<ul>
+  <li><code>surveys/index.js</code> — updated master list</li>
+  <li><code>surveys/[survey-name].js</code> — the new survey file</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>3. Uploading to GitHub</h2>
+<ol>
+  <li>Go to <strong>github.com/dgmahajan/Anganwadi-Survey</strong></li>
+  <li>Click <strong>Add file → Upload files</strong></li>
+  <li>Drag both files into the upload area</li>
+  <li>Click <strong>Commit changes</strong></li>
+  <li>Wait 1–2 minutes — the survey goes live automatically</li>
+</ol>
+<div class="warn">
+  ⚠️ When uploading the survey file, make sure the filename includes the folder name.<br/>
+  For example: the file should be inside a folder called <code>surveys</code> on GitHub.<br/>
+  Your developer will tell you exactly which files to upload each time.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>4. Sharing the Survey</h2>
+<ul>
+  <li>Send this single link to the Taluka administrator: <code>https://dgmahajan.github.io/Anganwadi-Survey</code></li>
+  <li>He shares it in his WhatsApp group</li>
+  <li>Anganwadi workers open it on their phone and fill the form</li>
+  <li><strong>The link never changes</strong> — same link for every survey</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>5. Checking Responses</h2>
+<ol>
+  <li>Go to <strong>sheets.google.com</strong></li>
+  <li>Open <strong>Anganwadi Survey</strong></li>
+  <li>Each survey has its own tab at the bottom — click on it to see responses</li>
+</ol>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>6. How the Survey Closes</h2>
+<ul>
+  <li>The survey <strong>closes automatically on the end date</strong> you gave</li>
+  <li>After that date, workers see "No active surveys" — they cannot answer</li>
+  <li>Old responses remain safe in the Google Sheet</li>
+  <li>If you want to close early — tell your developer, he changes the end date and you upload</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>7. If a Worker Makes a Mistake</h2>
+<ul>
+  <li>Worker opens the link again, selects their Anganwadi</li>
+  <li>Their previous answers appear on screen automatically</li>
+  <li>They correct what is wrong and resubmit</li>
+  <li>The old answer is replaced with the new one in Google Sheet</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>8. Administrator Preview (TEST entry)</h2>
+<ul>
+  <li>Every survey has a special entry: ID = <strong>TEST</strong>, Name = <strong>Test Anganwadi (Admin Preview)</strong></li>
+  <li>The Taluka administrator selects these to preview and test the survey</li>
+  <li>TEST submissions are saved to the sheet like any other Anganwadi</li>
+</ul>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>9. Checking Which Anganwadis Have NOT Yet Responded</h2>
+<p>Open this link in your browser:</p>
+<div class="box">
+  <code>https://dgmahajan.github.io/Anganwadi-Survey/pending.html</code>
+</div>
+<p>You will see:</p>
+<ul>
+  <li>Total Anganwadis / Submitted / <strong>Pending count</strong> for each active survey</li>
+  <li>A table of all Anganwadis that have <strong>not yet submitted</strong> — with ID and name</li>
+  <li><strong>Download CSV</strong> — saves the list to your computer (opens in Excel)</li>
+  <li><strong>Copy List</strong> — copies ID + Anganwadi name to clipboard (paste into WhatsApp or email)</li>
+</ul>
+<div class="warn">
+  ⚠️ This page requires the Apps Script to be updated once by your developer.<br/>
+  He adds a small code block (<code>apps-script-pending-action.js</code>) to the Apps Script and re-deploys it.
+  After that, the pending page works automatically for all future surveys too.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<h2>10. Adding More Anganwadis After Survey is Live</h2>
+<ul>
+  <li>Tell your developer — give him the new IDs and Anganwadi names</li>
+  <li>He updates the survey file and gives it back to you</li>
+  <li>You upload to GitHub — new Anganwadis appear in the dropdown immediately</li>
+  <li>Anganwadis that already submitted are not affected</li>
+</ul>
+
+<hr style="margin-top:40px;"/>
+<p style="color:#888;font-size:13px;text-align:center;">
+  Survey System built for Anganwadi / ICDS Department, Murbad Taluka<br/>
+  For technical help contact your developer
+</p>
+
+</body>
+</html>
